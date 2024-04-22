@@ -75,7 +75,7 @@ namespace Demo
                 renderer.Draw(sprite1, new System.Numerics.Vector2(0, -0.5f), new System.Numerics.Vector2(1, 1), 0, SpriteBoundingBox.Identity);
 
                 //Render
-                renderer.Render(true,Veldrid.RgbaFloat.CornflowerBlue);
+                renderer.Render(true,Veldrid.RgbaFloat.CornflowerBlue,1000);
 
                 //Present
                 device.Present();

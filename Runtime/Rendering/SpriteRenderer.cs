@@ -351,17 +351,19 @@ namespace Runtime.Rendering
                     {
                         Task task = UpdateCPUInstanceDataAsync(batchCall.Calls, (int)(batchCall.CurrentCallIndex - drawCallCount), drawCallPerThread,instanceOffset);
                         _currentTasks.Add(task);
+
+                        instanceOffset += drawCallPerThread;
                     }
                     else
                     {
                         Task task = UpdateCPUInstanceDataAsync(batchCall.Calls, (int)(batchCall.CurrentCallIndex - drawCallCount), drawCallCount,instanceOffset);
                         _currentTasks.Add(task);
+
+                        instanceOffset += drawCallCount;
                     }
 
                     drawCallCount -= drawCallPerThread;
                 }
-
-                instanceOffset += (int)batchCall.CurrentCallIndex;
             }
 
             //Wait for the cpu tasks
@@ -419,7 +421,7 @@ namespace Runtime.Rendering
         {
             //Iterate batches and collect instance data
             int instanceIndex = baseInstanceOffset;
-            for (int drawIndex = drawCallOffset; drawIndex < drawCallCount; drawIndex++)
+            for (int drawIndex = drawCallOffset; drawIndex < drawCallOffset+drawCallCount; drawIndex++)
             {
                 //Get draw call
                 DrawCall drawCall = drawCalls[drawIndex];
