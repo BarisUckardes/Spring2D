@@ -11,6 +11,9 @@ using static System.Formats.Asn1.AsnWriter;
 
 namespace Runtime.Rendering
 {
+    /// <summary>
+    /// A renderer where you can submit draw calls adn render them in a performant way
+    /// </summary>
     public sealed class SpriteRenderer : IDisposable
     {
         private struct DrawCall
@@ -86,6 +89,14 @@ namespace Runtime.Rendering
             };
         }
 
+        /// <summary>
+        /// Set camera data, it will recreate the graphics pipeline if the Veldrid.Framebuffer is different from the before
+        /// </summary>
+        /// <param name="targetFramebuffer"></param>
+        /// <param name="position"></param>
+        /// <param name="orthoSize"></param>
+        /// <param name="nPlane"></param>
+        /// <param name="fPlane"></param>
         public void SetCameraData(Veldrid.Framebuffer targetFramebuffer,in Vector2 position,float orthoSize,float nPlane,float fPlane)
         {
             //Check framebuffer
@@ -110,6 +121,10 @@ namespace Runtime.Rendering
 
         }
 
+        /// <summary>
+        /// Sets the sampler for the shader texture sampling
+        /// </summary>
+        /// <param name="sampler"></param>
         public void SetSampler(Veldrid.Sampler sampler)
         {
             //Clear the former
@@ -127,6 +142,15 @@ namespace Runtime.Rendering
             _samplerResourceSet = _device.CreateResourceSet(setDesc);
         }
 
+        /// <summary>
+        /// Registers a draw call
+        /// </summary>
+        /// <param name="sprite"></param>
+        /// <param name="position"></param>
+        /// <param name="scale"></param>
+        /// <param name="rotation"></param>
+        /// <param name="boundingBox"></param>
+        /// <exception cref="Exception"></exception>
         public void Draw(Sprite sprite,in Vector2 position,in Vector2 scale,float rotation,in SpriteBoundingBox boundingBox)
         {
             //Check new draw call range
@@ -167,6 +191,13 @@ namespace Runtime.Rendering
             _currentBatchCount++;
         }
 
+        /// <summary>
+        /// Renders the registered draw calls
+        /// </summary>
+        /// <param name="bMultithreaded"></param>
+        /// <param name="clearColor"></param>
+        /// <param name="drawCallPerThread"></param>
+        /// <exception cref="Exception"></exception>
         public void Render(bool bMultithreaded,in Veldrid.RgbaFloat clearColor,int drawCallPerThread = 1000)
         {
             if (_currentDrawCallCount > _instanceCpuData.Length)

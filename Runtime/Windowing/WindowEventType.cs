@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Runtime.Windowing
 {
+    /// <summary>
+    /// Supported event types
+    /// </summary>
     public enum WindowEventType
     {
         None,

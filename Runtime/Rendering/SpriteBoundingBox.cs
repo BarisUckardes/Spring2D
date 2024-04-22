@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Runtime.Rendering
 {
+    /// <summary>
+    /// Simple bounding box for sprite sampling
+    /// </summary>
     public struct SpriteBoundingBox
     {
         public static SpriteBoundingBox Identity = new SpriteBoundingBox()

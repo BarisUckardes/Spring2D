@@ -10,6 +10,9 @@ using System.Numerics;
 
 namespace Runtime.Windowing
 {
+    /// <summary>
+    /// Simple window handling class
+    /// </summary>
     public sealed class Window : IDisposable
     {
         public Window(in WindowDesc desc)
@@ -34,8 +37,19 @@ namespace Runtime.Windowing
 
         }
 
+        /// <summary>
+        /// Whether the window is active or not
+        /// </summary>
         public bool IsAlive => UnderlyingWindow.Exists;
+
+        /// <summary>
+        /// The buffered events after the event polling
+        /// </summary>
         public IReadOnlyCollection<WindowEvent> BufferedEvents => _bufferedEvents;
+
+        /// <summary>
+        /// The window size
+        /// </summary>
         public Vector2 Size
         {
             get
@@ -48,6 +62,10 @@ namespace Runtime.Windowing
                 UnderlyingWindow.Height = (int)value.Y;
             }
         }
+
+        /// <summary>
+        /// The window position/offset
+        /// </summary>
         public Vector2 Position
         {
             get
@@ -60,6 +78,10 @@ namespace Runtime.Windowing
                 UnderlyingWindow.Y = (int)value.Y;
             }
         }
+
+        /// <summary>
+        /// The window state
+        /// </summary>
         public WindowState State
         {
             get
@@ -74,6 +96,9 @@ namespace Runtime.Windowing
 
         internal Veldrid.Sdl2.Sdl2Window UnderlyingWindow { get; private init; }
 
+        /// <summary>
+        /// Polls the queued up events
+        /// </summary>
         public void PollEvents()
         {
             _bufferedEvents.Clear();

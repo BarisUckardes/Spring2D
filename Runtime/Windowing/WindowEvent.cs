@@ -8,6 +8,9 @@ using Veldrid;
 
 namespace Runtime.Windowing
 {
+    /// <summary>
+    /// The data which holds the per event information
+    /// </summary>
     public struct WindowEvent
     {
         public WindowEventType Type;

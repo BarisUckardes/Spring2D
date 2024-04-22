@@ -8,8 +8,18 @@ using Veldrid;
 
 namespace Runtime.Graphics
 {
+    /// <summary>
+    /// Simple graphics utils
+    /// </summary>
     public static class GraphicsUtils
     {
+        /// <summary>
+        /// Loads the texture from the path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="device"></param>
+        /// <returns></returns>
+        /// <exception cref="FileNotFoundException"></exception>
         public unsafe static Texture LoadTexture(string path,GraphicsDevice device)
         {
             //Check

@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Runtime.Rendering
 {
+    /// <summary>
+    /// Sprite class it holds the target data and the target regions which to enable support for sprite atlases
+    /// </summary>
     public sealed class Sprite : IDisposable
     {
         public Sprite(GraphicsDevice device)
@@ -29,6 +32,9 @@ namespace Runtime.Rendering
             _device = device;
         }
 
+        /// <summary>
+        /// The target texture
+        /// </summary>
         public Veldrid.Texture? Texture
         {
             get
@@ -50,11 +56,20 @@ namespace Runtime.Rendering
                 ResourceSet = _device.CreateResourceSet(setDesc);
             }
         }
+
+        /// <summary>
+        /// The resource set for binding to the graphics pipeline
+        /// </summary>
         public Veldrid.ResourceSet? ResourceSet { get; private set; }
+
+        /// <summary>
+        /// The bounding box of the sprite
+        /// </summary>
         public SpriteBoundingBox Bounds { get; set; }
+
         public void Dispose()
         {
-
+            ResourceSet?.Dispose();
         }
 
         private GraphicsDevice _device;

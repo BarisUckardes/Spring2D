@@ -8,6 +8,9 @@ using Veldrid;
 
 namespace Runtime.Windowing
 {
+    /// <summary>
+    /// Descriptor for to create a new window
+    /// </summary>
     public struct WindowDesc
     {
         public Vector2 Offset;
