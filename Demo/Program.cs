@@ -1,6 +1,7 @@
 ﻿using Runtime.Graphics;
 using Runtime.Rendering;
 using Runtime.Windowing;
+using System.Numerics;
 
 namespace Demo
 {
@@ -47,6 +48,71 @@ namespace Demo
             //Create renderer
             SpriteRenderer renderer = new SpriteRenderer(device);
 
+            //Initialize
+            Vector2[] positions0 = new Vector2[]
+            {
+                new System.Numerics.Vector2(0, 0),
+                new System.Numerics.Vector2(1, 0),
+                new System.Numerics.Vector2(-1, 0),
+                new System.Numerics.Vector2(0, 1),
+                new System.Numerics.Vector2(0, -1)
+            };
+
+            Vector2[] scales0 = new Vector2[]
+            {
+                new System.Numerics.Vector2(1, 1),
+                new System.Numerics.Vector2(1, 1),
+                 new System.Numerics.Vector2(1, 1),
+                new System.Numerics.Vector2(1, 1),
+                 new System.Numerics.Vector2(1, 1)
+            };
+
+            float[] rotations0 = new float[]
+            {
+                0,0,0,0,0
+            };
+
+            SpriteBoundingBox[] boundingBoxes0 = new SpriteBoundingBox[]
+            {
+                SpriteBoundingBox.Identity,
+                SpriteBoundingBox.Identity,
+                SpriteBoundingBox.Identity,
+                SpriteBoundingBox.Identity,
+                SpriteBoundingBox.Identity
+            };
+
+            Vector2[] positions1 = new Vector2[]
+            {
+                new System.Numerics.Vector2(0, 0),
+                new System.Numerics.Vector2(0.5f, 0),
+                new System.Numerics.Vector2(-0.5f, 0),
+                new System.Numerics.Vector2(0, 0.5f),
+                new System.Numerics.Vector2(0, -0.5f)
+            };
+
+            Vector2[] scales1 = new Vector2[]
+            {
+                new System.Numerics.Vector2(1, 1),
+                new System.Numerics.Vector2(1, 1),
+                new System.Numerics.Vector2(1, 1),
+                new System.Numerics.Vector2(1, 1),
+                new System.Numerics.Vector2(1, 1)
+            };
+
+            float[] rotations1 = new float[]
+            {
+                0,0,0,0,0
+            };
+
+            SpriteBoundingBox[] boundingBoxes1 = new SpriteBoundingBox[]
+            {
+                SpriteBoundingBox.Identity,
+                SpriteBoundingBox.Identity,
+                SpriteBoundingBox.Identity,
+                SpriteBoundingBox.Identity,
+                SpriteBoundingBox.Identity
+            };
+
             //Set sampler
             renderer.SetSampler(device.LinearSampler);
 
@@ -62,20 +128,11 @@ namespace Demo
                     break;
 
                 //Populate draw call
-                renderer.Draw(sprite0, new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1), 0,SpriteBoundingBox.Identity);
-                renderer.Draw(sprite0, new System.Numerics.Vector2(1, 0), new System.Numerics.Vector2(1, 1), 0,SpriteBoundingBox.Identity);
-                renderer.Draw(sprite0, new System.Numerics.Vector2(-1, 0), new System.Numerics.Vector2(1, 1), 0,SpriteBoundingBox.Identity);
-                renderer.Draw(sprite0, new System.Numerics.Vector2(0, 1), new System.Numerics.Vector2(1, 1), 0,SpriteBoundingBox.Identity);
-                renderer.Draw(sprite0, new System.Numerics.Vector2(0, -1), new System.Numerics.Vector2(1, 1), 0,SpriteBoundingBox.Identity);
-
-                renderer.Draw(sprite1, new System.Numerics.Vector2(0, 0), new System.Numerics.Vector2(1, 1), 0, SpriteBoundingBox.Identity);
-                renderer.Draw(sprite1, new System.Numerics.Vector2(0.5f, 0), new System.Numerics.Vector2(1, 1), 0, SpriteBoundingBox.Identity);
-                renderer.Draw(sprite1, new System.Numerics.Vector2(-0.5f, 0), new System.Numerics.Vector2(1, 1), 0, SpriteBoundingBox.Identity);
-                renderer.Draw(sprite1, new System.Numerics.Vector2(0, 0.5f), new System.Numerics.Vector2(1, 1), 0, SpriteBoundingBox.Identity);
-                renderer.Draw(sprite1, new System.Numerics.Vector2(0, -0.5f), new System.Numerics.Vector2(1, 1), 0, SpriteBoundingBox.Identity);
+                renderer.DrawGrouped(sprite0, positions0, scales0, rotations0, boundingBoxes0);
+                renderer.DrawGrouped(sprite1, positions1, scales1, rotations1, boundingBoxes1);
 
                 //Render
-                renderer.Render(true,Veldrid.RgbaFloat.CornflowerBlue,1000);
+                renderer.Render(true, Veldrid.RgbaFloat.CornflowerBlue, 1000);
 
                 //Present
                 device.Present();

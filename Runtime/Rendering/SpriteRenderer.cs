@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
+using Vortice.Mathematics;
 using Vulkan;
 using static System.Formats.Asn1.AsnWriter;
 
@@ -28,7 +29,7 @@ namespace Runtime.Rendering
         {
             public Sprite? Sprite;
             public DrawCall[] Calls;
-            public uint CurrentCallIndex;
+            public int CurrentCallIndex;
         }
         private struct CameraData
         {
@@ -54,12 +55,12 @@ namespace Runtime.Rendering
         private const int InstanceDataSize = 64 + 16;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        public SpriteRenderer(GraphicsDevice device,int batchCacheSize = 1000,int drawCallCacheSize = 10000,int instanceMaxCount = 10000)
+        public SpriteRenderer(GraphicsDevice device, int batchCacheSize = 1000, int drawCallCacheSize = 10000, int instanceMaxCount = 10000)
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             //Allocate resources
             _batches = new BatchCall[batchCacheSize];
-            for(int i = 0;i< _batches.Length;i++)
+            for (int i = 0; i < _batches.Length; i++)
             {
                 BatchCall batchCall = new BatchCall()
                 {
@@ -97,7 +98,7 @@ namespace Runtime.Rendering
         /// <param name="orthoSize"></param>
         /// <param name="nPlane"></param>
         /// <param name="fPlane"></param>
-        public void SetCameraData(Veldrid.Framebuffer targetFramebuffer,in Vector2 position,float orthoSize,float nPlane,float fPlane)
+        public void SetCameraData(Veldrid.Framebuffer targetFramebuffer, in Vector2 position, float orthoSize, float nPlane, float fPlane)
         {
             //Check framebuffer
             if (targetFramebuffer == null)
@@ -114,7 +115,7 @@ namespace Runtime.Rendering
             };
 
             //Recreate pipeline
-            if(_targetFramebuffer != targetFramebuffer)
+            if (_targetFramebuffer != targetFramebuffer)
                 RecreateGraphicsPipeline(targetFramebuffer);
 
             _targetFramebuffer = targetFramebuffer;
@@ -128,7 +129,7 @@ namespace Runtime.Rendering
         public void SetSampler(Veldrid.Sampler sampler)
         {
             //Clear the former
-            if(_sampler != null)
+            if (_sampler != null)
                 _samplerResourceSet.Dispose();
 
             //Create new one and set
@@ -151,10 +152,14 @@ namespace Runtime.Rendering
         /// <param name="rotation"></param>
         /// <param name="boundingBox"></param>
         /// <exception cref="Exception"></exception>
-        public void Draw(Sprite sprite,in Vector2 position,in Vector2 scale,float rotation,in SpriteBoundingBox boundingBox)
+        public void Draw(Sprite sprite, in Vector2 position, in Vector2 scale, float rotation, in SpriteBoundingBox boundingBox)
         {
+            //Check batch range
+            if (_currentBatchCount > _batchCallCacheSize - 1)
+                throw new Exception("Batch calls limt exceeded");
+
             //Check new draw call range
-            if (_currentDrawCallCount > _drawCallCacheSize)
+            if (_currentDrawCallCount > _drawCallCacheSize-1)
                 throw new Exception("Draw calls limit exceeded");
 
             //Check underlying texture
@@ -162,10 +167,10 @@ namespace Runtime.Rendering
                 return;
 
             //Check if this sprite is existing inside the draw calls
-            for(int i = 0;i<_currentBatchCount;i++)
-            { 
+            for (int i = 0; i < _currentBatchCount; i++)
+            {
                 BatchCall batchCall = _batches[i];
-                if(batchCall.Sprite == sprite)
+                if (batchCall.Sprite == sprite)
                 {
                     batchCall.Calls[batchCall.CurrentCallIndex] = new DrawCall() { Position = position, Scale = scale, Rotation = rotation, BoundingBox = boundingBox };
                     batchCall.CurrentCallIndex++;
@@ -181,13 +186,69 @@ namespace Runtime.Rendering
 
             //Setup new batch
             BatchCall newBatchCall = _batches[_currentBatchCount];
-            newBatchCall.CurrentCallIndex =1;
+            newBatchCall.CurrentCallIndex = 1;
             newBatchCall.Sprite = sprite;
             newBatchCall.Calls[0] = new DrawCall() { Position = position, Scale = scale, Rotation = rotation, BoundingBox = boundingBox };
             _batches[_currentBatchCount] = newBatchCall;
 
             //Increment
             _currentDrawCallCount++;
+            _currentBatchCount++;
+        }
+
+        public void DrawGrouped(Sprite sprite, Vector2[] positions, Vector2[] scales, float[] rotations, SpriteBoundingBox[] boundingBoxes)
+        {
+            //Check batch range
+            if (_currentBatchCount > _batchCallCacheSize - 1)
+                throw new Exception("Batch calls limt exceeded");
+
+            //Check new draw call range
+            if (_currentDrawCallCount > _drawCallCacheSize - 1)
+                throw new Exception("Draw calls limit exceeded");
+
+            //Check the range length
+            if (positions.Length != scales.Length || positions.Length != rotations.Length || positions.Length != boundingBoxes.Length)
+                throw new Exception("Given parameter array lengths does not batch positions!=scales!=rotations!=boundingBoxes");
+
+            //Check if this sprite is existing inside the draw calls
+            for (int batchIndex = 0; batchIndex < _currentBatchCount; batchIndex++)
+            {
+                BatchCall batchCall = _batches[batchIndex];
+                if (batchCall.Sprite == sprite)
+                {
+                    //Check if this batch call can get all the requested draw calls
+                    if ((_drawCallCacheSize - batchCall.CurrentCallIndex) < positions.Length)
+                        throw new Exception("This batch exceeds it's draw call limit!");
+
+                    for(int callIndex = 0;callIndex < positions.Length;callIndex++)
+                    {
+                        batchCall.Calls[batchCall.CurrentCallIndex] = new DrawCall() { Position = positions[callIndex], Scale = scales[callIndex], Rotation = rotations[callIndex], BoundingBox = boundingBoxes[callIndex] };
+                        batchCall.CurrentCallIndex++;
+                    }
+                 
+                    _batches[batchIndex] = batchCall;
+                    _currentDrawCallCount++;
+                    return;
+                }
+            }
+
+            //Setup new batch
+            BatchCall newBatchCall = _batches[_currentBatchCount];
+            newBatchCall.CurrentCallIndex = 0;
+            newBatchCall.Sprite = sprite;
+            //Check if this batch call can get all the requested draw calls
+            if ((_drawCallCacheSize - newBatchCall.CurrentCallIndex) < positions.Length)
+                throw new Exception("This batch exceeds it's draw call limit!");
+
+            for (int callIndex = 0; callIndex < positions.Length; callIndex++)
+            {
+                newBatchCall.Calls[newBatchCall.CurrentCallIndex] = new DrawCall() { Position = positions[callIndex], Scale = scales[callIndex], Rotation = rotations[callIndex], BoundingBox = boundingBoxes[callIndex] };
+                newBatchCall.CurrentCallIndex++;
+            }
+            _batches[_currentBatchCount] = newBatchCall;
+
+            //Increment
+            _currentDrawCallCount+=positions.Length;
             _currentBatchCount++;
         }
 
@@ -312,7 +373,7 @@ namespace Runtime.Rendering
 
                 _cmdList.SetGraphicsResourceSet(3, batch.Sprite.ResourceSet);
 
-                _cmdList.DrawIndexed(6,batch.CurrentCallIndex,0,0, (uint)instanceOffset);
+                _cmdList.DrawIndexed(6, (uint)batch.CurrentCallIndex,0,0, (uint)instanceOffset);
 
                 instanceOffset += (int)batch.CurrentCallIndex;
             }
@@ -405,7 +466,7 @@ namespace Runtime.Rendering
 
                 _cmdList.SetGraphicsResourceSet(3, batch.Sprite.ResourceSet);
 
-                _cmdList.DrawIndexed(6, batch.CurrentCallIndex, 0, 0, (uint)instanceOffset);
+                _cmdList.DrawIndexed(6, (uint)batch.CurrentCallIndex, 0, 0, (uint)instanceOffset);
 
                 instanceOffset += (int)batch.CurrentCallIndex;
             }
