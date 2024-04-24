@@ -5,16 +5,13 @@ Spring2D is a simple SpriteRenderer to make some people life easier. It's instan
 It uses Veldrid for it's graphics abstraction layer over Vulkan and Metal.
 
 Supported platforms
-
-*Windows
-
-*Linux
-
-*MacOS
-
+- [x] Windows
+- [x] Linux
+- [x] MacOS
 
 Supported graphics backends
 
-*Vulkan
-
-*Metal
+- [x] Vulkan
+- [x] Metal
+- [x] OpenGL
+- [x] Directx11
